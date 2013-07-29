@@ -1,0 +1,15 @@
+{application, pivot_api, [
+  {id, "pivot_api"},
+  {description, "Multi-armed bandit API"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications, [
+    kernel,
+    stdlib,
+    crypto,
+    ranch,
+    cowboy
+  ]},
+  {mod, { pivot_api_app, []}},
+  {env, []}
+]}.

@@ -1,0 +1,4 @@
+{'_', [
+  {"/track", pivot_server_track_handler, []},
+  {"/assign", pivot_server_assign_handler, []}
+]}.
