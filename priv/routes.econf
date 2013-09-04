@@ -1,4 +1,4 @@
 {'_', [
-  {"/track", pivot_server_track_handler, []},
-  {"/assign", pivot_server_assign_handler, []}
+  {"/track", pivot_api_track_handler, []},
+  {"/assign", pivot_api_assign_handler, []}
 ]}.
