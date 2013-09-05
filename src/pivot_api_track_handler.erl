@@ -7,39 +7,38 @@
 -export([handle/2]).
 -export([terminate/3]).
 
--define(ERROR (Error, Req), cowboy_req:reply(400, [{<<"content-type">>, <<"application/json">>}], <<"{\"error\":{\"message\":\"", Error/binary, "\",\"code\":400}}">>, Req)).
+-include("pivot_api.hrl").
 
-init(_Transport, Req, []) ->
-  {ok, Req, undefined}.
+init(_Transport, Req, [Ref]) ->
+  {ok, Req, Ref}.
 
-handle(Req, State) ->
+handle(Req, Ref) ->
   {Method, Req2} = cowboy_req:method(Req),
-  {ok, Req3} = check_method(Method, Req2),
-  {ok, Req3, State}.
+  {ok, Req3} = check_method(Method, Ref, Req2),
+  {ok, Req3, Ref}.
 
-check_method(<<"GET">>, Req) ->
+check_method(<<"GET">>, Ref, Req) ->
   {App, Req2} = cowboy_req:qs_val(<<"a">>, Req),
   {Event, Req3} = cowboy_req:qs_val(<<"e">>, Req2),
   {UserID, Req4} = cowboy_req:qs_val(<<"u">>, Req3),
-  maybe_track(App, Event, UserID, Req4);
-check_method(<<"POST">>, Req) ->
+  maybe_track(App, Event, UserID, Ref, Req4);
+check_method(<<"POST">>, Ref, Req) ->
   {ok, Params, Req2} = cowboy_req:body_qs(Req),
   App = fast_key:get(<<"a">>, Params),
   Event = fast_key:get(<<"e">>, Params),
   UserID = fast_key:get(<<"u">>, Params),
-  maybe_track(App, Event, UserID, Req2);
-check_method(_, Req) ->
+  maybe_track(App, Event, UserID, Ref, Req2);
+check_method(_, _, Req) ->
   %% Method not allowed.
   cowboy_req:reply(405, Req).
 
-maybe_track(undefined, _, _, Req) ->
+maybe_track(undefined, _, _, _, Req) ->
   ?ERROR(<<"Missing app (a) parameter.">>, Req);
-maybe_track(_, undefined, _, Req) ->
+maybe_track(_, undefined, _, _, Req) ->
   ?ERROR(<<"Missing event (e) parameter.">>, Req);
-maybe_track(_, _, undefined, Req) ->
+maybe_track(_, _, undefined, _, Req) ->
   ?ERROR(<<"Missing user id (u) parameter.">>, Req);
-maybe_track(App, Event, UserID, Req) ->
-  {Ref, Req} = cowboy_req:meta(pivot_ref, Req),
+maybe_track(App, Event, UserID, Ref, Req) ->
   ok = pivot:track(Ref, App, Event, UserID),
   cowboy_req:reply(200, [], <<"">>, Req).
 
