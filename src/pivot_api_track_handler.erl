@@ -39,7 +39,7 @@ maybe_track(_, undefined, _, _, Req) ->
 maybe_track(_, _, undefined, _, Req) ->
   ?ERROR(<<"Missing user id (u) parameter.">>, Req);
 maybe_track(App, Event, UserID, Ref, Req) ->
-  ok = pivot:track(Ref, App, Event, UserID),
+  ok = pivot:track(Ref, cowboy_env:get(Req), App, Event, UserID),
   cowboy_req:reply(200, [], <<"">>, Req).
 
 terminate(_Reason, _Req, _State) ->

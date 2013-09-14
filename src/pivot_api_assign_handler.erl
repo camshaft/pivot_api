@@ -35,7 +35,7 @@ maybed_assign(undefined, _, _, Req) ->
 maybed_assign(_, undefined, _, Req) ->
   ?ERROR(<<"Missing user id (u) parameter.">>, Req);
 maybed_assign(App, UserID, Ref, Req) ->
-  Res = pivot:assign(Ref, App, UserID),
+  Res = pivot:assign(Ref, cowboy_env:get(Req), App, UserID),
   respond(Res, Req).
 
 respond({ok, Assignments, CacheLength}, Req) ->
